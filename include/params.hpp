@@ -1,0 +1,8 @@
+//
+// Created by valmorx on 2025/10/5.
+//
+
+#ifndef YOLO_ANOMALYDETECT_PARAMS_HPP
+#define YOLO_ANOMALYDETECT_PARAMS_HPP
+
+#endif //YOLO_ANOMALYDETECT_PARAMS_HPP
