@@ -14,7 +14,7 @@
 namespace params {
 
     // Project Version 版本信息
-    inline string version                        =   "v1.0.1";
+    inline string version                        =   "v1.0.2";
 
     // Debug Switch 调试开关
     inline bool isDebug                          =   true;
