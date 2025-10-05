@@ -13,33 +13,113 @@
 
 namespace params {
 
+    // Project Version 版本信息
+    inline string version                        =   "v1.0.1";
+
     // Debug Switch 调试开关
     inline bool isDebug                          =   true;
     inline bool isMonitor                        =   true;
 
     // File Path option 路径相关
-    inline std::string Engine_Path               =   "../models/yolo11s-pose-v2.engine";
-    inline std::string Video_Path                =   "/home/valmorx/DeepLearningSource/Meow.mp4";
+    inline std::string Engine_Path               =   "/home/valmorx/CLionProjects/Yolo_AnomalyDetect/models/yolo11s-pose-v2.engine";
 
     // Engine option 引擎相关
     inline int max_batch_size                    =   1;
-    inline int engine_width                      =   320;
-    inline int engine_height                     =   320;
+    inline int engine_width                      =   640;
+    inline int engine_height                     =   640;
 
     // Camera option 相机相关
     inline int cap_width                         =   1920;
     inline int cap_height                        =   1080;
-    inline int cap_index                         =   0;  // 摄像头选择
+    inline int cap_index                         =   4;  // 摄像头选择
     inline int roi_width                         =   1920;
     inline int roi_height                        =   1080;
+
+    // Tracker option 追踪器相关
     inline int tracker_frameRate                 =   60; // 追踪器帧率
     inline int tracker_bufferSize                =   30; // 追踪器缓冲区大小
+
+    // Algorithm option 算法相关
+    inline int KPS_num                           =   17; // 关键点数量
+    inline float KPS_threshold                   =   0.0; // 关键点置信度阈值
+    inline float Rect_WidthHeight_Ratio          =   0.9; // 检测框外接矩形长宽比
+    inline float MIN_KneeHip_Theta               =   30.0; // 膝盖和脚踝角度最小阈值
+    inline float MAX_KneeHip_Theta               =   70.0; // 膝盖和脚踝角度最大阈值
+    inline float ShoulderBackKnee_Theta          =   70.0; // 肩、髋、膝夹角阈值
+    inline float BackKneeFoot_Theta              =   30.0; // 髋、膝、脚踝夹角阈值
 
     // Basic Class Tag 原始种类标签
     inline std::vector<std::string> class_names  =   {
 
         "bending", "down", "up"
 
+    };
+
+    const std::vector<std::vector<unsigned int>> KPS_COLORS =
+    {
+        {0,   255, 0},
+        {0,   255, 0},
+        {0,   255, 0},
+        {0,   255, 0},
+        {0,   255, 0},
+        {255, 128, 0},
+        {255, 128, 0},
+        {255, 128, 0},
+        {255, 128, 0},
+        {255, 128, 0},
+        {255, 128, 0},
+        {51,  153, 255},
+        {51,  153, 255},
+        {51,  153, 255},
+        {51,  153, 255},
+        {51,  153, 255},
+        {51,  153, 255}
+    };
+
+    const std::vector<std::vector<unsigned int>> SKELETON =
+    {
+        {16, 14},
+        {14, 12},
+        {17, 15},
+        {15, 13},
+        {12, 13},
+        {6,  12},
+        {7,  13},
+        {6,  7},
+        {6,  8},
+        {7,  9},
+        {8,  10},
+        {9,  11},
+        {2,  3},
+        {1,  2},
+        {1,  3},
+        {2,  4},
+        {3,  5},
+        {4,  6},
+        {5,  7}
+    };
+
+    const std::vector<std::vector<unsigned int>> LIMB_COLORS =
+    {
+        {51,  153, 255},
+        {51,  153, 255},
+        {51,  153, 255},
+        {51,  153, 255},
+        {255, 51,  255},
+        {255, 51,  255},
+        {255, 51,  255},
+        {255, 128, 0},
+        {255, 128, 0},
+        {255, 128, 0},
+        {255, 128, 0},
+        {255, 128, 0},
+        {0,   255, 0},
+        {0,   255, 0},
+        {0,   255, 0},
+        {0,   255, 0},
+        {0,   255, 0},
+        {0,   255, 0},
+        {0,   255, 0}
     };
 
 

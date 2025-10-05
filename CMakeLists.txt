@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(Yolo_AnomalyDetect)
+project(Yolo_AnomalyDetect VERSION 1.0.1)
 
 set(CMAKE_CXX_STANDARD 20)
 
