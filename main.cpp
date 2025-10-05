@@ -8,6 +8,7 @@
 
 int main() {
 
-    func::anomaly_detect();
+    // func::anomaly_detect();
+    func::anomaly_detect_multiBatch();
 
 }

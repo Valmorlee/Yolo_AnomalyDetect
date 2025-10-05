@@ -44,12 +44,14 @@ namespace tools {
     );
 
     int fps_display(cv::Mat& image);
+    int fps_display_multiBatch(cv::Mat& image, int batch_size, std::chrono::time_point<std::chrono::high_resolution_clock> batch_start_time);
 
 }
 
 namespace func {
 
     int anomaly_detect();
+    int anomaly_detect_multiBatch();
 
 
 }

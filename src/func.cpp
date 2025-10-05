@@ -630,6 +630,69 @@ void detect_By_tracker(
         return 0;
     }
 
+    /**
+     * 绘制批处理模式下的FPS信息
+     * @param image 图像
+     * @param batch_size 批处理大小
+     * @param batch_start_time 批处理开始时间
+     * @return 0表示成功
+     */
+    int fps_display_multiBatch(cv::Mat& image, int batch_size, std::chrono::time_point<std::chrono::high_resolution_clock> batch_start_time)
+    {
+        // 计算批处理的总时间
+        auto batch_end_time = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(batch_end_time - batch_start_time);
+        double batch_time_seconds = duration.count() / 1000000.0;
+
+        // 计算平均FPS（整个批次的处理速度）
+        double batch_fps = batch_size / batch_time_seconds;
+
+        // 计算移动平均FPS
+        static std::vector<double> fps_history(10, 0.0);
+        static int history_index = 0;
+        static bool initialized = false;
+
+        if (!initialized) {
+            // 初始化历史记录
+            for (int i = 0; i < 10; i++) {
+                fps_history[i] = batch_fps;
+            }
+            initialized = true;
+        }
+
+        // 更新FPS历史记录（循环队列方式）
+        fps_history[history_index] = batch_fps;
+        history_index = (history_index + 1) % 10;
+
+        // 计算平均FPS
+        double avg_fps = 0.0;
+        for (int i = 0; i < 10; i++) {
+            avg_fps += fps_history[i];
+        }
+        avg_fps /= 10.0;
+
+        // 绘制FPS信息
+        char text[64];
+        sprintf(text, "Batch FPS: %.2f (Avg: %.2f)", batch_fps, avg_fps);
+
+        int baseLine = 0;
+        cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+
+        // 右上角位置
+        int x = image.cols - label_size.width - 10;  // 右边距10像素
+        int y = label_size.height + 10;              // 上边距10像素
+
+        // 绘制FPS标签背景
+        cv::rectangle(image, cv::Rect(cv::Point(x, y - label_size.height), cv::Size(label_size.width, label_size.height + baseLine)),
+            cv::Scalar(0, 0, 0), -1);
+
+        // 绘制FPS文本
+        cv::putText(image, text, cv::Point(x, y),
+            cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255, 255, 255), 1, cv::LINE_AA);
+
+        return 0;
+    }
+
 }
 
 namespace func {
@@ -692,6 +755,118 @@ namespace func {
                 cv::imshow("Detection Result", res);
 
                 // 按 'q' 键退出
+                if (cv::waitKey(1) == 'q') {
+                    break;
+                }
+            }
+
+            // 释放资源
+            cap.release();
+            cv::destroyAllWindows();
+
+        } catch (const std::exception& e) {
+            std::cerr << "程序异常错误: " << e.what() << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        std::cout << "主程序已关闭" << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+    /**
+     * 摔倒检测 批处理版本
+     * @return 0表示成功
+     */
+    int anomaly_detect_multiBatch() {
+
+        try {
+            trtyolo::InferOption option;
+            option.enableSwapRB();  // BGR->RGB转换
+
+            std::cout << "Init Basic Option! Ciallo～ (∠・ω< )⌒★" << std::endl;
+
+            auto detector = std::make_unique<trtyolo::PoseModel>(
+                params::Engine_Path,  // 模型路径
+                option
+            );
+
+            std::cout << "Init Engine with batch size " << params::max_batch_size << "! Ciallo～ (∠・ω< )⌒★" << std::endl;
+
+            cv::VideoCapture cap(params::cap_index, cv::CAP_V4L2);
+            if (!cap.isOpened()) {
+                throw std::runtime_error("摄像头无法初始化");
+            }
+
+            cap.set(cv::CAP_PROP_FRAME_WIDTH, params::cap_width);
+            cap.set(cv::CAP_PROP_FRAME_HEIGHT, params::cap_height);
+            cap.set(cv::CAP_PROP_FPS, params::tracker_frameRate);
+
+            std::cout << "Init Camera! Ciallo～ (∠・ω< )⌒★" << std::endl;
+
+            BYTETracker tracker(params::tracker_frameRate, params::tracker_bufferSize);
+            
+            // 批处理帧缓冲区
+            std::vector<cv::Mat> frame_batch;
+            frame_batch.reserve(params::max_batch_size);
+            
+            std::cout << "AnomalyDetect " << params::version << " (Batch Version) Init Done! Ciallo～ (∠・ω< )⌒★" << std::endl;
+
+            while (true) {
+                // 记录批处理开始时间
+                auto batch_start_time = std::chrono::high_resolution_clock::now();
+                
+                // 收集一批帧
+                frame_batch.clear();
+                for (int i = 0; i < params::max_batch_size; ++i) {
+                    cv::Mat frame;
+                    cap >> frame;
+                    if (frame.empty()) {
+                        std::cerr << "无法获取摄像头帧" << std::endl;
+                        if (frame_batch.empty()) {
+                            break;
+                        }
+                        // 如果不是第一批就继续处理剩余帧
+                    } else {
+                        frame_batch.push_back(frame);
+                    }
+                }
+                
+                if (frame_batch.empty()) {
+                    break;
+                }
+
+                // 创建批处理图像
+                std::vector<trtyolo::Image> images;
+                images.reserve(frame_batch.size());
+                for (const auto& frame : frame_batch) {
+                    images.emplace_back(frame.data, frame.cols, frame.rows);
+                }
+
+                // 批处理预测
+                std::vector<trtyolo::PoseRes> results = detector->predict(images);
+
+                // 处理每个结果
+                for (size_t i = 0; i < results.size(); ++i) {
+                    std::vector<Object> objects = tools::revert2Tracker(results[i]);
+
+                    std::vector<STrack> output = tracker.update(objects);
+
+                    cv::Mat res;
+
+                    tools::detect_By_tracker(frame_batch[i], res, objects, output, params::SKELETON, params::KPS_COLORS, params::LIMB_COLORS);
+
+                    // 使用批处理版本的FPS显示函数
+                    tools::fps_display_multiBatch(res, frame_batch.size(), batch_start_time);
+
+                    cv::imshow("Detection Result", res);
+
+                    // 按 'q' 键退出
+                    if (cv::waitKey(1) == 'q') {
+                        break;
+                    }
+                }
+                
+                // 检查是否需要退出
                 if (cv::waitKey(1) == 'q') {
                     break;
                 }
