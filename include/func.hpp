@@ -12,73 +12,6 @@
 
 #include "params.hpp"
 
-const std::vector<std::vector<unsigned int>> KPS_COLORS =
-{
-    {0,   255, 0},
-    {0,   255, 0},
-    {0,   255, 0},
-    {0,   255, 0},
-    {0,   255, 0},
-    {255, 128, 0},
-    {255, 128, 0},
-    {255, 128, 0},
-    {255, 128, 0},
-    {255, 128, 0},
-    {255, 128, 0},
-    {51,  153, 255},
-    {51,  153, 255},
-    {51,  153, 255},
-    {51,  153, 255},
-    {51,  153, 255},
-    {51,  153, 255}
-};
-
-const std::vector<std::vector<unsigned int>> SKELETON =
-{
-    {16, 14},
-    {14, 12},
-    {17, 15},
-    {15, 13},
-    {12, 13},
-    {6,  12},
-    {7,  13},
-    {6,  7},
-    {6,  8},
-    {7,  9},
-    {8,  10},
-    {9,  11},
-    {2,  3},
-    {1,  2},
-    {1,  3},
-    {2,  4},
-    {3,  5},
-    {4,  6},
-    {5,  7}
-};
-
-const std::vector<std::vector<unsigned int>> LIMB_COLORS =
-{
-    {51,  153, 255},
-    {51,  153, 255},
-    {51,  153, 255},
-    {51,  153, 255},
-    {255, 51,  255},
-    {255, 51,  255},
-    {255, 51,  255},
-    {255, 128, 0},
-    {255, 128, 0},
-    {255, 128, 0},
-    {255, 128, 0},
-    {255, 128, 0},
-    {0,   255, 0},
-    {0,   255, 0},
-    {0,   255, 0},
-    {0,   255, 0},
-    {0,   255, 0},
-    {0,   255, 0},
-    {0,   255, 0}
-};
-
 namespace tools {
     // bool isTracking(int classId);                                                        // 判断是否为追踪目标
     base::dataBox filterBoxes(std::vector<base::dataBox> &boxes);
@@ -110,9 +43,14 @@ namespace tools {
         const std::vector<std::vector<unsigned int>> &LIMB_COLORS
     );
 
+    int fps_display(cv::Mat& image);
+
 }
 
-namespace function {
+namespace func {
+
+    int anomaly_detect();
+
 
 }
 
