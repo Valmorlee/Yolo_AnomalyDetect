@@ -3,6 +3,11 @@ project(Yolo_AnomalyDetect)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(project_root ${PROJECT_SOURCE_DIR})
+set(project_src ${project_root}/src)
+set(project_include ${project_root}/include)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/out)
+
 # 旧协议指令屏蔽
 if(POLICY CMP0146)
     cmake_policy(SET CMP0146 OLD)
@@ -46,13 +51,23 @@ find_package(CURL REQUIRED)
 #========= Eigen3 ===========
 include_directories(/usr/include/eigen3)
 
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/out)
+include_directories(
+        ${project_include}
+)
 
 add_executable(Yolo_AnomalyDetect
         main.cpp
-        /usr/local/cuda/lib64/libcudart.so.12
-        ${Python3_LIBRARIES}
-        ${RT_YOLO_ROOT}/lib/libtrtyolo.so
+        ${SRC}
         include/params.hpp
+        include/func.hpp
 
 )
+
+target_link_libraries(Yolo_AnomalyDetect
+        ${OpenCV_LIBS}
+        ${Python3_LIBRARIES}
+        ${RT_YOLO_ROOT}/lib/libtrtyolo.so
+        /usr/local/cuda/lib64/libcudart.so.12
+
+)
+

@@ -1,0 +1,10 @@
+
+trtyolo export -w models/yolo11s-pose-v2.pt -v yolo11 -o models --iou_thres 0.5 --conf_thres 0.5 -b -1 -s
+
+trtexec --onnx=models/yolo11s-pose-v2.onnx --saveEngine=models/yolo11s-pose-v2.engine --fp16 --staticPlugins=/home/valmorx/ContestSource/TensorRT-YOLO/lib/libcustom_plugins.so --setPluginsToSerialize=/home/valmorx/ContestSource/TensorRT-YOLO/lib/libcustom_plugins.so --minShapes=images:1x3x640x640 --optShapes=images:4x3x640x640 --maxShapes=images:8x3x640x640
+
+
+
+
+
+
