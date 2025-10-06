@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(Yolo_AnomalyDetect VERSION 1.0.2)
+project(Yolo_AnomalyDetect VERSION 1.1.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -21,8 +21,8 @@ find_package(CUDA REQUIRED)
 include_directories(/usr/local/cuda/include)
 link_directories(/usr/local/cuda/lib64)
 
-include_directories(/home/valmorx/DeepLearningSource/cudnn-8.9.7/include) # jetson del
-link_directories(/home/valmorx/DeepLearningSource/cudnn-8.9.7/lib) # jetson del
+#include_directories(/home/valmorx/DeepLearningSource/cudnn-8.9.7/include) # jetson del
+#link_directories(/home/valmorx/DeepLearningSource/cudnn-8.9.7/lib) # jetson del
 
 #========== OpenCV ==========
 find_package(OpenCV REQUIRED)
@@ -34,12 +34,12 @@ link_directories(${PROJECT_BINARY_DIR}/../lib/)
 
 #========= TENSORRT =========
 
-include_directories(/home/valmorx/DeepLearningSource/TensorRT-8.6.1.6/include) # jetson del
-link_directories(/home/valmorx/DeepLearningSource/TensorRT-8.6.1.6/lib) # jetson del
+#include_directories(/home/valmorx/DeepLearningSource/TensorRT-8.6.1.6/include) # jetson del
+#link_directories(/home/valmorx/DeepLearningSource/TensorRT-8.6.1.6/lib) # jetson del
 
 #========== EXTRA ==========
 
-set(RT_YOLO_ROOT /home/valmorx/ContestSource/TensorRT-YOLO)
+set(RT_YOLO_ROOT /home/jetson/TensorRT-YOLO)
 include_directories(${RT_YOLO_ROOT}/include)
 link_directories(${RT_YOLO_ROOT}/lib)
 
