@@ -443,16 +443,17 @@ void detect_By_tracker(
 
         // 摔倒检测
         bool is_fall = fallDetXAlgorithm(kps);
+        save_index_local(is_fall);
 
         // 绘制状态标签
         char text_[32];
         if (is_fall)
         {
-            sprintf(text_, "STATUS:FALL");
+            sprintf(text_, "FALLING");
         }
         else
         {
-            sprintf(text_, "STATUS:NORMAL");
+            sprintf(text_, "GOODSTATUS");
         }
 
         int baseLine_ = 0;
@@ -693,6 +694,26 @@ void detect_By_tracker(
         return 0;
     }
 
+    void save_index_local(bool status_index, std::string file_path) {
+        // 打开文件，使用 trunc 模式确保每次写入都会覆盖文件内容
+        std::ofstream file(file_path, std::ios::out | std::ios::trunc);
+        
+        // 检查文件是否成功打开
+        if (!file.is_open()) {
+            std::cerr << "无法打开文件: " << file_path << std::endl;
+            return;
+        }
+
+        if (status_index) {
+            file << "1";
+        }else {
+            file << "0";
+        }
+        
+        // 关闭文件
+        file.close();
+    }
+
 }
 
 namespace func {
@@ -875,6 +896,163 @@ namespace func {
             // 释放资源
             cap.release();
             cv::destroyAllWindows();
+
+        } catch (const std::exception& e) {
+            std::cerr << "程序异常错误: " << e.what() << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        std::cout << "主程序已关闭" << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+    /**
+     * 摔倒检测 视频处理版本 (可选缩放显示)
+     * @param video_path 输入视频路径
+     * @param output_path 输出视频路径
+     * @param keep_original_size 是否保持原始尺寸显示和保存（true=原尺寸，false=缩放尺寸）
+     * @return 0表示成功
+     */
+    int anomaly_detect_video(const std::string& video_path, const std::string& output_path, bool keep_original_size) {
+
+        try {
+            int frame_ratio = 6;  // 缩放比例
+
+            trtyolo::InferOption option;
+            option.enableSwapRB();  // BGR->RGB转换
+
+            std::cout << "Init Basic Option! Ciallo～ (∠・ω< )⌒★" << std::endl;
+
+            auto detector = std::make_unique<trtyolo::PoseModel>(
+                params::Engine_Path,  // 模型路径
+                option
+            );
+
+            std::cout << "Init Engine! Ciallo～ (∠・ω< )⌒★" << std::endl;
+
+            cv::VideoCapture cap(video_path);
+            if (!cap.isOpened()) {
+                throw std::runtime_error("视频文件无法初始化: " + video_path);
+            }
+
+            // 获取视频属性
+            int frame_width = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH));
+            int frame_height = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT));
+            double fps = cap.get(cv::CAP_PROP_FPS);
+            int total_frames = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_COUNT));
+
+            // 计算缩放后的尺寸
+            int scaled_width = frame_width / frame_ratio;
+            int scaled_height = frame_height / frame_ratio;
+
+            std::cout << "原始视频信息 - 宽度: " << frame_width << ", 高度: " << frame_height 
+                      << ", FPS: " << fps << ", 总帧数: " << total_frames << std::endl;
+            std::cout << "推理尺寸 - 宽度: " << scaled_width << ", 高度: " << scaled_height << std::endl;
+            
+            if (keep_original_size) {
+                std::cout << "输出模式: 保持原始尺寸显示和保存" << std::endl;
+            } else {
+                std::cout << "输出模式: 使用缩放尺寸显示和保存" << std::endl;
+            }
+
+            std::cout << "Init Video Source! Ciallo～ (∠・ω< )⌒★" << std::endl;
+
+            // 初始化视频写入器（根据参数决定尺寸）
+            cv::VideoWriter writer;
+            if (keep_original_size) {
+                writer.open(output_path, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 
+                            fps, cv::Size(frame_width, frame_height));
+            } else {
+                writer.open(output_path, cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 
+                            fps, cv::Size(scaled_width, scaled_height));
+            }
+            
+            if (!writer.isOpened()) {
+                throw std::runtime_error("无法初始化视频写入器: " + output_path);
+            }
+
+            std::cout << "Init Video Writer! Ciallo～ (∠・ω< )⌒★" << std::endl;
+
+            BYTETracker tracker(params::tracker_frameRate, params::tracker_bufferSize);
+            cv::Mat frame;
+
+            std::cout << "AnomalyDetect " << params::version << " (Video Version) Init Done! Ciallo～ (∠・ω< )⌒★" << std::endl;
+
+            int processed_frames = 0;
+            while (true) {
+                cap >> frame;
+                if (frame.empty()) {
+                    std::cout << "视频处理完成" << std::endl;
+                    break;
+                }
+
+                // 缩放图像用于推理
+                cv::Mat scaled_frame;
+                cv::resize(frame, scaled_frame, cv::Size(scaled_width, scaled_height));
+
+                trtyolo::Image image(scaled_frame.data, scaled_frame.cols, scaled_frame.rows);
+                trtyolo::PoseRes result = detector->predict(image);
+
+                // 调整检测结果到原始尺寸（如果需要）
+                if (keep_original_size) {
+                    for (auto& box : result.boxes) {
+                        box.left *= frame_ratio;
+                        box.right *= frame_ratio;
+                        box.top *= frame_ratio;
+                        box.bottom *= frame_ratio;
+                    }
+                    
+                    for (auto& kpts : result.kpts) {
+                        for (auto& kpt : kpts) {
+                            kpt.x *= frame_ratio;
+                            kpt.y *= frame_ratio;
+                        }
+                    }
+                }
+
+                std::vector<Object> objects;
+                cv::Mat display_frame;
+                
+                if (keep_original_size) {
+                    objects = tools::revert2Tracker(result);
+                    display_frame = frame;  // 使用原始尺寸帧显示
+                } else {
+                    objects = tools::revert2Tracker(result);
+                    display_frame = scaled_frame;  // 使用缩放帧显示
+                }
+
+                std::vector<STrack> output = tracker.update(objects);
+
+                cv::Mat res;
+
+                tools::detect_By_tracker(display_frame, res, objects, output, params::SKELETON, params::KPS_COLORS, params::LIMB_COLORS);
+
+                tools::fps_display(res);
+
+                // 写入处理后的帧到输出视频
+                writer.write(res);
+                
+                processed_frames++;
+                if (processed_frames % 30 == 0) {
+                    std::cout << "已处理帧数: " << processed_frames << "/" << total_frames << std::endl;
+                }
+
+                // 显示处理结果（可选）
+                // cv::imshow("Processing Video", res);
+                
+                // 按 'q' 键退出
+                if (cv::waitKey(1) == 'q') {
+                    std::cout << "用户中断处理" << std::endl;
+                    break;
+                }
+            }
+
+            // 释放资源
+            cap.release();
+            writer.release();
+            cv::destroyAllWindows();
+
+            std::cout << "视频处理完成，结果已保存至: " << output_path << std::endl;
 
         } catch (const std::exception& e) {
             std::cerr << "程序异常错误: " << e.what() << std::endl;

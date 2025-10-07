@@ -11,6 +11,13 @@
 #include "trtyolo.hpp"
 
 #include "params.hpp"
+#include <random>
+#include <curl/curl.h>
+#include <nlohmann/json.hpp>
+
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 
 namespace tools {
     // bool isTracking(int classId);                                                        // 判断是否为追踪目标
@@ -46,12 +53,15 @@ namespace tools {
     int fps_display(cv::Mat& image);
     int fps_display_multiBatch(cv::Mat& image, int batch_size, std::chrono::time_point<std::chrono::high_resolution_clock> batch_start_time);
 
+    void save_index_local(bool status_index, std::string file_path = "../UploadModule/upload_tmpfile.txt");
+
 }
 
 namespace func {
 
     int anomaly_detect();
     int anomaly_detect_multiBatch();
+    int anomaly_detect_video(const std::string& video_path, const std::string& output_path, bool keep_original_size = true);
 
 
 }
