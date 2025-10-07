@@ -21,10 +21,10 @@ namespace params {
     inline bool isMonitor                        =   true;
 
     // File Path option 路径相关
-    inline std::string Engine_Path               =   "/home/jetson/CLionProjects/Yolo_AnomalyDetect/models/yolo11n-pose-v2.engine";
+    inline std::string Engine_Path               =   "/home/jetson/CLionProjects/Yolo_AnomalyDetect/models/yolo11n-pose-v3.engine";
 
     // Engine option 引擎相关
-    inline int max_batch_size                    =   1;
+    inline int max_batch_size                    =   3;
     inline int engine_width                      =   640;
     inline int engine_height                     =   640;
 
@@ -41,7 +41,7 @@ namespace params {
 
     // Algorithm option 算法相关
     inline int KPS_num                           =   17; // 关键点数量
-    inline float KPS_threshold                   =   0.25; // 关键点置信度阈值
+    inline float KPS_threshold                   =   0.3; // 关键点置信度阈值
     inline float Rect_WidthHeight_Ratio          =   0.9; // 检测框外接矩形长宽比
     inline float MIN_KneeHip_Theta               =   30.0; // 膝盖和脚踝角度最小阈值
     inline float MAX_KneeHip_Theta               =   70.0; // 膝盖和脚踝角度最大阈值

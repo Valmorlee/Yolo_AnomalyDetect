@@ -68,6 +68,9 @@ target_link_libraries(Yolo_AnomalyDetect
         ${Python3_LIBRARIES}
         ${RT_YOLO_ROOT}/lib/libtrtyolo.so
         /usr/local/cuda/lib64/libcudart.so.12
+        ${CURL_LIBRARIES}
 
 )
 
+# Add UploadModule subdirectory
+add_subdirectory(UploadModule)

@@ -3,7 +3,7 @@ trtyolo export -w models/yolo11s-pose-v2.pt -v yolo11 -o models --iou_thres 0.5 
 
 trtyolo export -w models/yolo11n-pose-v3.pt -v yolo11 -o models --iou_thres 0.5 --conf_thres 0.6 -b -1 -s
 
-trtyolo export -w models/yolo11n-pose-v3.pt -v yolo11 -o models --iou_thres 0.5 --conf_thres 0.6 -b 1 --imgsz 320 -s
+trtyolo export -w models/yolo11s-pose-v3.pt -v yolo11 -o models --iou_thres 0.5 --conf_thres 0.7 -b 1 --imgsz 640 -s
 
 trtexec --onnx=models/yolo11s-pose-v2.onnx --saveEngine=models/yolo11s-pose-v2.engine --fp16 --staticPlugins=/home/jetson/TensorRT-YOLO/lib/libcustom_plugins.so --setPluginsToSerialize=/home/jetson/TensorRT-YOLO/lib/libcustom_plugins.so --minShapes=images:1x3x640x640 --optShapes=images:4x3x640x640 --maxShapes=images:8x3x640x640
 
